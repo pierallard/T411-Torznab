@@ -374,16 +374,41 @@ app.get ('/torrent/:torrentid',
 					'Authorization':userToken
 				}
 			};
+			function dropTracker (body)
+			{
+				var result = '';
+
+				var i = 1;
+				var number = '';
+				while (!isNaN(body[i])) {
+					number = number + body[i];
+					i += 1;
+				}
+				i += parseInt(number);
+				i += 1;
+				result += body.substr(0, i);
+
+				number = '';
+				while (!isNaN(body[i])) {
+					number = number + body[i];
+					i+= 1;
+				}
+
+				result += '4:yolo';
+				result += body.substr(i + parseInt(number) + 1);
+
+				return result;
+			}
 			function callBackTorrent (error, response, body)
 			{
 				if (!error && response.statusCode == 200)
 				{
 					res.contentType('application/x-bittorrent');
-					res.setHeader('Content-Disposition','attachment; filename="'+req.params.torrentid+'.torrent"');
-					res.write(body);
+					res.set({"Content-Disposition":"attachment; filename=\""+req.params.torrentid+".torrent\""});
+					res.send(dropTracker(body));
 				}
 			}
-			request (requestData).pipe(res);
+			request (requestData, callBackTorrent);
 		}
 		else
 		{
